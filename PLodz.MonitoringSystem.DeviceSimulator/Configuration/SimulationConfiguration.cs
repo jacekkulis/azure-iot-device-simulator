@@ -17,12 +17,17 @@ namespace PLodz.MonitoringSystem.DeviceSimulator.Configuration
     public class MessageSequenceItem
     {
         private const int _defaultIterations = 1;
+        private const int _defaultDelay = 1000;
 
         [JsonProperty("type")]
         public string MessageType { get; set; }
         [DefaultValue(_defaultIterations)]
         [JsonProperty("iterations")]
         public int Iterations { get; set; }
+
+        [DefaultValue(_defaultDelay)]
+        [JsonProperty("delay")]
+        public int Delay { get; set; }
     }
 
     public class SimulationConfiguration

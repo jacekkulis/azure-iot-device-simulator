@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using System;
+using Newtonsoft.Json;
 
 namespace PLodz.MonitoringSystem.DeviceSimulator.Models
 {
@@ -6,17 +7,15 @@ namespace PLodz.MonitoringSystem.DeviceSimulator.Models
     {
         public override string MessageType => "event";
 
-        public override string Generate(MessageContext ctx, bool keepState = false)
+        public override string Generate(MessageContext ctx)
         {
             var msg = new EventMessage()
             {
                 Header = new MessageHeader()
                 {
-                    organization_id = ctx.CreateGuid(),
-                    entity_uuid = ctx.AssetId,
-                    message_uuid = ctx.CreateGuid(),
-                    message_type = this.MessageType,
-                    publish_time = ctx.EpochTimestamp()
+                    MessageUuid = ctx.Randomizer.NextGuid().ToString(),
+                    MessageType = this.MessageType,
+                    PublishTime = DateTime.Now
                 },
                 Body = new EventData()
                 {
@@ -24,7 +23,6 @@ namespace PLodz.MonitoringSystem.DeviceSimulator.Models
                 }
             };
 
-            ctx.Messages.Add(msg);
             return JsonConvert.SerializeObject(msg);
         }
     }

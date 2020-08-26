@@ -4,10 +4,12 @@ namespace PLodz.MonitoringSystem.DeviceSimulator.Models
 {
     public interface IMessage
     {
-        string Generate(MessageContext ctx, bool keepState = false);
+        string Generate(MessageContext ctx);
 
         Dictionary<string, string> GetProperties();
 
         string GetContentType();
+
+        byte[] GetBytes();
     }
 }

@@ -24,7 +24,7 @@ namespace PLodz.MonitoringSystem.DeviceSimulator
     {
         private readonly RegistryManager _regMngr;
         private readonly SimulationConfiguration _config;
-        private readonly MessagePropagator _propagator = new MessagePropagator();
+        private readonly MessagePropagator _senders = new MessagePropagator();
 
         public Simulator(SimulationConfiguration config)
         {
@@ -58,39 +58,40 @@ namespace PLodz.MonitoringSystem.DeviceSimulator
             if (_config.MinDelay > 0)
             {
                 var delay = new Random(Guid.NewGuid().GetHashCode()).Next(_config.MinDelay, _config.MaxDelay);
-                Console.WriteLine($"Delaying session by {delay}");
+                Console.WriteLine($"Delaying message by {delay}");
                 await Task.Delay(delay, cancelToken);
             }
 
             var iothubPropagatorId = Guid.Empty;
 
             var device = await _regMngr.GetDeviceAsync(assetId, cancelToken);
+
             var client = DeviceClient.Create(_config.AzureConfig.IotHub,
-                new DeviceAuthenticationWithRegistrySymmetricKey(assetId,
-                    device.Authentication.SymmetricKey.PrimaryKey), TransportType.Mqtt);
+                new DeviceAuthenticationWithRegistrySymmetricKey(assetId, device.Authentication.SymmetricKey.PrimaryKey), TransportType.Mqtt);
 
-            iothubPropagatorId = _propagator.RegisterMessageSender<IoTHubMessageSender>(client);
-
+            iothubPropagatorId = _senders.RegisterMessageSender<IoTHubMessageSender>(client);
 
             for (var i = 0; i < _config.Iterations; i++)
             {
-                // Create a session context for each propagator
                 var contexts = new List<MessageContext>();
-                var sessionId = Guid.NewGuid().ToString().ToUpper();
 
-                contexts.Add(new MessageContext(assetId, _config, Logger.LogLevel.Error));
+                contexts.Add(new MessageContext(assetId, Logger.LogLevel.Error));
 
                 foreach (var item in _config.SequenceItems)
                 {
-                    contexts[0].Logger.LogInformation($"Sending message: {item.MessageType}...");
-                    await _propagator.SendMessage(contexts, item.MessageType);
-                    Thread.Sleep(5000);
+                    for (var j = 0; j < item.Iterations; j++)
+                    {
+                        contexts[0].Logger.LogInformation($"Sending message: {item.MessageType}...");
+                        await _senders.SendMessage(contexts, item.MessageType);
+
+                        Thread.Sleep(item.Delay);
+                    }
                 }
             }
 
             if (iothubPropagatorId != Guid.Empty)
             {
-                _propagator.UnregisterMessageSender(iothubPropagatorId);
+                _senders.UnregisterMessageSender(iothubPropagatorId);
             }
 
             return new SimulationResult(true);

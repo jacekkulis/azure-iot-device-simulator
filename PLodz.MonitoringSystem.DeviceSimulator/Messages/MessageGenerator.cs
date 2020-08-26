@@ -3,16 +3,20 @@ using PLodz.MonitoringSystem.DeviceSimulator.Models;
 
 namespace PLodz.MonitoringSystem.DeviceSimulator
 {
-    public static class MessageFactory
+    public static class MessageGenerator
     {
         public static IMessage CreateInstance(string messageType)
         {
             switch (messageType)
             {
                 case "telemetry":
-                    return Activator.CreateInstance<TelemetryMessage>();
+                    var telemetryMsg = new TelemetryMessage();
+
+                    return telemetryMsg;
                 case "event":
-                    return Activator.CreateInstance<EventMessage>();
+                    var eventMsg = new EventMessage();
+
+                    return eventMsg;
                 default:
                     throw new ArgumentNullException("Unknown message type.");
                     break;

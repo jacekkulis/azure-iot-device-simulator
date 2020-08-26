@@ -40,13 +40,5 @@ namespace PLodz.MonitoringSystem.DeviceSimulator
                 await _senders.ElementAt(i).Value.SendMessage(contexts[i], messageType);
             }
         }
-
-        //public async Task SendMessage<T>(MessageContext ctx) where T : IMessage
-        //{
-        //    foreach (var sender in _senders)
-        //    {
-        //        await sender.Value.SendMessage<T>(ctx);
-        //    }
-        //}
     }
 }
