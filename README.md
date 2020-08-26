@@ -1,1 +1,1 @@
-# azure-sphere-iot-device-simulator
+# azure-iot-device-simulator
